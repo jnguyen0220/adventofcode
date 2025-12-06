@@ -8,8 +8,8 @@ use common::read_and_print_comma_separated_values;
 use std::collections::HashSet;
 
 fn main() {
-    let file_name = "temp.txt";
-    // let file_name = "input.txt";
+    // let file_name = "temp.txt";
+    let file_name = "input.txt";
 
     match read_and_print_comma_separated_values(file_name) {
         Ok(ranges) => {
@@ -52,9 +52,10 @@ fn find_invalid_product_id_part2(start: i64, end: i64) -> i64 {
         }
 
         // Check if palindrome
-        if is_unique(&number_string) == 1 {
+        let unique_count = is_unique(&number_string);
+        if unique_count == 1 {
             sum += i;
-            println!("Found invalid product ID: {} {}", i, "unique");
+            println!("{:?}", i);
             continue;
         }
 
@@ -73,11 +74,10 @@ fn find_invalid_product_id_part2(start: i64, end: i64) -> i64 {
             }
             if hash.len() == 1 {
                 sum += i;
-                println!("Found invalid product ID: {} {}", i, "interval");
+                println!("{:?}", i);
                 break;
             }
         }
-        // println!("{:?} | {} {}", middle, i, hash.len());
     }
     sum
 }

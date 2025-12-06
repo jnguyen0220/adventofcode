@@ -108,8 +108,10 @@ pub fn factors(n: i64) -> Vec<i64> {
     result
 }
 
-pub fn is_unique(s: &str) -> i32 {
-    let mut seen = HashSet::new();
-    s.chars().all(|c| seen.insert(c));
-    seen.len() as i32
+pub fn is_unique(s: &str) -> usize {
+    let mut set = HashSet::new();
+    for ch in s.chars() {
+        set.insert(ch);
+    }
+    set.len()
 }
