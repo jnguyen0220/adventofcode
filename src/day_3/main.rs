@@ -2,8 +2,6 @@
 // can be compiled directly with `rustc` (no Cargo required).
 #[path = "../common.rs"]
 mod common;
-use common::factors;
-use common::is_unique;
 use common::read_integers_from_file;
 use std::collections::HashMap;
 use std::collections::HashSet;
