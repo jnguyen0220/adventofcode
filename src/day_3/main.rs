@@ -5,6 +5,7 @@ mod common;
 use common::factors;
 use common::is_unique;
 use common::read_integers_from_file;
+use std::collections::HashMap;
 use std::collections::HashSet;
 
 fn main() {
@@ -28,26 +29,38 @@ fn main() {
 }
 
 fn find_max_joltage(line: &str) -> i64 {
-    let mut numbers: Vec<i64> = Vec::new();
-    for n in line.chars() {
-        let num = n.to_digit(10).unwrap() as i64;
-        // if !numbers.contains(&num) {
-        numbers.push(num);
-        // }
+    let mut ordered: Vec<(i64, Vec<usize>)> = Vec::new();
+    let mut seen: Vec<i64> = Vec::new();
+    let mut map: HashMap<i64, Vec<usize>> = HashMap::new();
+
+    for (i, c) in line.chars().enumerate() {
+        let num = c.to_digit(10).unwrap() as i64;
+        map.entry(num).or_insert(Vec::new()).push(i);
     }
 
-    let mut combo: Vec<i64> = Vec::new();
-    for i in 0..numbers.len() {
-        for j in i+1..numbers.len() {
-            let ab = format!("{}{}", numbers[i], numbers[j]).parse::<i64>().unwrap();
-            combo.push(ab)
+    let mut possible: Vec<i64> = Vec::new();
+    const MAX_LENGTH: usize = 11;
+    while possible.len() <= MAX_LENGTH {
+        let cutoff = line.len() - (MAX_LENGTH - possible.len());
+        let mut found: Vec<(i64, usize)> = Vec::new();
+        for (num, indices) in &map {
+            for (i, index) in indices.iter().enumerate() {
+                if *index < cutoff {
+                    found.push((*num, *index));
+                    break;
+                }
+            }
         }
-    }
-    // println!("{:?}", combo);
-    // println!("{:?}", numbers);
-    let max = combo.iter().max().unwrap();
-    println!("{:?}", max);
-    *max
+        if let Some(max) = found.iter().max_by_key(|&&(a, _)| a) {
+            possible.push(max.0);
+            for vec in map.values_mut() {
+                vec.retain(|&x| x > max.1);
+            }
 
-    // combo.iter().max()
+            map.retain(|_, v| !v.is_empty());
+        }
+        // println!("{:?} {:?} {:?}", possible, found, map);
+    }
+    let num = possible.into_iter().fold(0, |acc, d| acc * 10 + d);
+    num
 }
