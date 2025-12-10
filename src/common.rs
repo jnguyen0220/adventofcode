@@ -1,6 +1,8 @@
 use std::collections::HashSet;
+use std::fs;
 use std::fs::File;
 use std::io::{self, BufRead, BufReader, Read};
+use std::num::ParseIntError;
 
 pub fn read_integers_from_file(file_path: &str) -> Result<Vec<String>, io::Error> {
     let file = File::open(file_path)?; // Open the file, handle potential errors
@@ -114,4 +116,30 @@ pub fn is_unique(s: &str) -> usize {
         set.insert(ch);
     }
     set.len()
+}
+
+pub fn read_range_and_ingredents(
+    file_path: &str,
+) -> Result<(Vec<(i64, i64, HashSet<usize>)>, Vec<i64>), io::Error> {
+    let content = fs::read_to_string(file_path);
+    let binding = content?;
+    let parts: Vec<&str> = binding.split("\n\n").collect();
+    let mut ranges: Vec<(i64, i64, HashSet<usize>)> = Vec::new();
+
+    for line in parts[0].lines() {
+        let partial: Vec<&str> = line.split("-").collect();
+        let mut set: HashSet<usize> = HashSet::new();
+        let start = partial[0].trim().parse().unwrap();
+        let end = partial[1].trim().parse().unwrap();
+        set.insert(partial[0].len());
+        set.insert(partial[1].len());
+        ranges.push((start, end, set));
+    }
+
+    let ingredents: Vec<i64> = parts[1]
+        .lines()
+        .map(|x| x.trim().parse::<i64>().unwrap())
+        .collect();
+
+    Ok((ranges, ingredents))
 }

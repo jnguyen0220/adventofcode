@@ -5,8 +5,8 @@ mod common;
 use common::read_integers_from_file;
 
 fn main() {
-    // let file_name = "temp.txt";
-    let file_name = "input.txt";
+    let file_name = "temp.txt";
+    // let file_name = "input.txt";
 
     match read_integers_from_file(file_name) {
         Ok(rolls) => find_number_rolls(rolls),
