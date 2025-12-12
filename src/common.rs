@@ -1,8 +1,9 @@
+use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs;
 use std::fs::File;
 use std::io::{self, BufRead, BufReader, Read};
-use std::num::ParseIntError;
+use std::path::Path;
 
 pub fn read_integers_from_file(file_path: &str) -> Result<Vec<String>, io::Error> {
     let file = File::open(file_path)?; // Open the file, handle potential errors
@@ -110,29 +111,21 @@ pub fn factors(n: i64) -> Vec<i64> {
     result
 }
 
-pub fn is_unique(s: &str) -> usize {
-    let mut set = HashSet::new();
-    for ch in s.chars() {
-        set.insert(ch);
-    }
-    set.len()
-}
-
 pub fn read_range_and_ingredents(
     file_path: &str,
-) -> Result<(Vec<(i64, i64, HashSet<usize>)>, Vec<i64>), io::Error> {
+) -> Result<(Vec<(i64, i64, HashSet<i64>)>, Vec<i64>), io::Error> {
     let content = fs::read_to_string(file_path);
     let binding = content?;
     let parts: Vec<&str> = binding.split("\n\n").collect();
-    let mut ranges: Vec<(i64, i64, HashSet<usize>)> = Vec::new();
+    let mut ranges: Vec<(i64, i64, HashSet<i64>)> = Vec::new();
 
     for line in parts[0].lines() {
         let partial: Vec<&str> = line.split("-").collect();
-        let mut set: HashSet<usize> = HashSet::new();
+        let mut set: HashSet<i64> = HashSet::new();
         let start = partial[0].trim().parse().unwrap();
         let end = partial[1].trim().parse().unwrap();
-        set.insert(partial[0].len());
-        set.insert(partial[1].len());
+        set.insert(partial[0].trim().len() as i64);
+        set.insert(partial[1].trim().len() as i64);
         ranges.push((start, end, set));
     }
 
@@ -142,4 +135,97 @@ pub fn read_range_and_ingredents(
         .collect();
 
     Ok((ranges, ingredents))
+}
+
+// pub fn parse_math_problem(file_path: &str) -> Result<(Vec<i64>, Vec<String>), io::Error> {
+//     let mut file = File::open(file_path)?;
+//     let mut contents = String::new();
+//     let mut matrix: HashMap<usize, Vec<i64>> = HashMap::new();
+//     let mut operator: Vec<String> = Vec::new();
+//     file.read_to_string(&mut contents)?;
+
+//     let mut lines = contents.lines().collect::<Vec<_>>();
+
+//     if let Some(last) = lines.pop() {
+//         let mut current_line: String = "".to_string();
+//         for position in last.chars() {
+//             if position != ' ' {
+//                 current_line += &position.to_string();
+//             }
+
+//             if position == ' ' && current_line.len() > 0 {
+//                 operator.push(current_line);
+//                 current_line = "".to_string();
+//             }
+//         }
+//         if current_line.len() > 0 {
+//             operator.push(current_line);
+//         }
+//     }
+
+//     for line in lines {
+//         let mut current_line: String = "".to_string();
+//         for position in line.chars() {
+//             if position != ' ' {
+//                 current_line += &position.to_string();
+//             }
+
+//             if position == ' ' && current_line.len() > 0 {
+//                 let value: i64 = current_line.parse().unwrap();
+//                 matrix.push(value);
+//                 current_line = "".to_string();
+//             }
+//         }
+//         if current_line.len() > 0 {
+//             let value: i64 = current_line.parse().unwrap();
+//             matrix.push(value);
+//         }
+//     }
+
+//     Ok((matrix, operator))
+// }
+
+pub fn parse_math_problem_vertical(file_path: &str) -> Result<(), io::Error> {
+    let path = Path::new(file_path);
+    let file = File::open(&path)?;
+    let mut values: HashMap<usize, Vec<i64>> = HashMap::new();
+    let reader = io::BufReader::new(file);
+    let mut operator: Vec<char> = Vec::new();
+
+    let mut lines: Vec<Vec<char>> = reader
+        .lines()
+        .filter_map(Result::ok)
+        .map(|line| line.chars().collect())
+        .collect();
+
+    if lines.is_empty() {
+        return Ok(());
+    }
+
+    if let Some(last) = lines.pop() {
+        println!("{:?}", last);
+    }
+
+    let line_len = lines[0].len();
+    let mut column: HashMap<usize, Vec<char>> = HashMap::new();
+    let mut block: usize = 0;
+    for i in 0..line_len - 1 {
+        for line in &lines {
+            column.entry(i).or_insert(Vec::new()).push(line[i]);
+        }
+        if let Some(value) = column.get(&i) {
+            let total_spaces: usize = value.iter().filter(|&&c| c == ' ').count();
+            if total_spaces == lines.len() {
+                // let filter_values: Vec<char> = value.iter().filter(|&c| c != ' ').collect();
+                let filtered: Vec<char> = value.iter().filter(|&&c| c != ' ').collect();
+                println!("{:?}", column);
+                column = HashMap::new();
+                block += 1;
+            }
+        }
+    }
+
+    println!("{:?}", column);
+
+    Ok(())
 }
